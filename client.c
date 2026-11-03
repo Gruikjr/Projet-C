@@ -130,7 +130,7 @@ int supprimerClient(Boutique *b, int idClient) {
 
     for (int i = 0; i < b->clients[index].nbCommandes; i++) {
 
-        if (b->clients[index].commandes[i].statut != ANNULEE) {
+        if (strcmp(b->clients[index].commandes[i].statut, STATUT_ANNULEE) != 0) {
             return 0;
         }
     }
@@ -149,8 +149,8 @@ void afficherListeClients(Boutique *b) {
         if (b->clients[i].actif == 1) {
             float chiffreAffaires = 0;
             for (int j = 0; j < b->clients[i].nbCommandes; j++) {
-                if (b->clients[i].commandes[j].statut == LIVREE) {
-                    chiffreAffaires += b->clients[i].commandes[j].montantTotal;
+                if (b->clients[i].commandes[j].statut, STATUT_LIVREE) {
+                    chiffreAffaires += b->clients[i].commandes[j].montantTVA;
                 }
             }
             printf("\nID : %d\n", b->clients[i].idClient);

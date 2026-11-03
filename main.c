@@ -45,10 +45,7 @@ static int lireChoix(void)
  * ========================================================================== */
 
 /* --- Module CLIENTS ------------------------------------------------------- */
-void afficherListeClients(void){ printf("  [STUB] afficherListeClients - a implementer dans client.c\n"); }
-
-/*  Module STATISTIQUES */
-void afficherChiffreAffaires(void) { printf("  [STUB] afficherChiffreAffaires - a implementer dans statistique.c\n"); }
+//void afficherListeClients(void){ printf("  [STUB] afficherListeClients - a implementer dans client.c\n");}
 
 /* ==========================================================================
  * SOUS-MENUS : un seul motif a retenir, applique 4 fois.
@@ -123,9 +120,11 @@ static void menuClients(void)
         case 3:
             printf("Fonction supprimer client à compléter.\n");
             break;
-            case 4: afficherListeClients(); break;
-            case 0:                         break;
-            default: printf("  [!] Choix invalide.\n"); break;
+        case 4:
+            printf("Fonction supprimer client à compléter.\n");
+            break;
+        case 0:                         break;
+        default: printf("  [!] Choix invalide.\n"); break;
         }
     } while (choix != 0);
 }
@@ -151,21 +150,27 @@ static void menuCommandes(Boutique *boutique)
     } while (choix != 0);
 }
 
-static void menuStatistiques(void)
+static void menuStatistiques(Boutique *b)
 {
     int choix;
     do
     {
         printf("\n===== STATISTIQUES =====\n");
-        printf("  1. Chiffre d'affaires global\n");
+        printf("  1. Chiffre d'affaires (total / mois / annee)\n");
+        printf("  2. Palmares produits (top 5)\n");
+        printf("  3. Palmares clients\n");
+        printf("  4. Alertes de stock\n");
         printf("  0. Retour au menu principal\n");
         choix = lireChoix();
 
         switch (choix)
         {
-            case 1: afficherChiffreAffaires(); break;
-            case 0:                            break;
-            default: printf("  [!] Choix invalide.\n"); break;
+        case 1: afficherChiffreAffaires(b);  break;
+        case 2: afficherPalmaresProduits(b); break;
+        case 3: afficherPalmaresClients(b);  break;
+        case 4: afficherAlertesStock(b);     break;
+        case 0:                              break;
+        default: printf("  [!] Choix invalide.\n"); break;
         }
     } while (choix != 0);
 }
@@ -213,7 +218,7 @@ int main(void)
         case 1: menuProduits(&boutique); break;
         case 2: menuClients(); break;
         case 3: menuCommandes(&boutique); break;
-        case 4: menuStatistiques(); break;
+        case 4: menuStatistiques(&boutique); break;
         case 0: printf("\n  Au revoir !\n"); break;
         default: printf("  [!] Choix invalide.\n"); break;
         }

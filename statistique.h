@@ -5,4 +5,23 @@
  *        les deux palmares (top 5 produits, classement clients).
  * NB : les commandes ANNULEE sont toujours exclues des calculs.
  * ============================================================ */
+#ifndef STATISTIQUE_H
+#define STATISTIQUE_H
 
+#include "types.h"
+
+/* Taille du palmares produits */
+#define TAILLE_PALMARES_PRODUITS 5
+
+/* Chiffre d'affaires (hors commandes ANNULEE) :
+ * mois = 0 -> toute l'annee ; annee = 0 -> toute la periode.
+ * Retourne le CA HT (apres remise) et, si ttc != NULL, le CA TTC. */
+double calculerChiffreAffaires(const Boutique *b, int mois, int annee,
+                               double *ttc);
+
+/* Affichages (interactifs : interrogent l'utilisateur si besoin) */
+void afficherChiffreAffaires(const Boutique *b);     /* global + periode  */
+void afficherPalmaresProduits(const Boutique *b);    /* top 5 par quantite */
+void afficherPalmaresClients(const Boutique *b);     /* tous, par CA       */
+
+#endif

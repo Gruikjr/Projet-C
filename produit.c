@@ -7,6 +7,7 @@
 #include "produit.h"
 #include "utils.h"
 
+
 #define CAPACITE_INITIALE_PRODUITS 4
 #define STOCK_MAX 1000000
 
