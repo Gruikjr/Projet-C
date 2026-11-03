@@ -18,6 +18,18 @@
 #define MAX_EMAIL 80
 #define MAX_TELEPHONE 15
 
+/* Tailles des champs (produits / statut) */
+#define LG_REFERENCE   12
+#define LG_DESIGNATION 60
+#define LG_CATEGORIE   30
+#define LG_STATUT      20
+
+/* Statuts possibles d'une commande */
+#define STATUT_EN_COURS "EN_COURS"
+#define STATUT_EXPEDIEE "EXPEDIEE"
+#define STATUT_LIVREE   "LIVREE"
+#define STATUT_ANNULEE  "ANNULEE"
+
 /* Constantes métier */
 #define TVA 20.0
 #define FRAIS_PORT 5.90
