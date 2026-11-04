@@ -82,7 +82,7 @@ int ajouterClient(Boutique *b, Client nouveauClient) {
     return 1;
 }
 
-//what
+//blabla blibli bloublou
 
 /* Modifier un client */
 
