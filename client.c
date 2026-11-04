@@ -166,7 +166,6 @@ void afficherListeClients(Boutique *b) {
 
 /* Afficher un client et son historique de commandes */
 void afficherClient(Boutique *b, int idClient) {
-
     int index = trouverClient(b, idClient);
 
     if (index == 0) {
@@ -176,7 +175,7 @@ void afficherClient(Boutique *b, int idClient) {
 
     index--;
 
-    printf("\nFICHE CLIENT\n");
+    printf("\n FICHE CLIENT \n");
     printf("ID : %d\n", b->clients[index].idClient);
     printf("Nom : %s %s\n", b->clients[index].prenom, b->clients[index].nom);
     printf("Email : %s\n", b->clients[index].email);
@@ -189,27 +188,30 @@ void afficherClient(Boutique *b, int idClient) {
     printf("Nombre de commandes : %d\n", b->clients[index].nbCommandes);
     printf("Points de fidelite : %d\n", b->clients[index].pointsFidelite);
 
-    if (b->clients[index].nbCommandes > 0) {
-        printf("\nHISTORIQUE DES COMMANDES\n");
-        for (int i = 0; i < b->clients[index].nbCommandes; i++) {
-            Commande *commande = &b->clients[index].commandes[i];
-            printf("\nCommande ID : %d\n", commande->idCommande);
-            printf("Date : %s\n", commande->date);
-            printf("Montant HT : %.2f euros\n", commande->montantHT);
-            printf("Montant TVA : %.2f euros\n", commande->montantTVA);
-            printf("Statut : %s\n", commande->statut);
-        }
-    } else {
-        printf("\nAucune commande pour ce client.\n");
+    printf("\n HISTORIQUE DES COMMANDES \n");
+    for (int i = 0; i < b->clients[index].nbCommandes; i++) {
+        Commande commande = b->clients[index].commandes[i];
+        printf("\nCommande ID : %d\n", commande.idCommande);
+        printf("Date : %s\n", commande.date);
+        printf("Montant TTC : %.2f euros\n", commande.montantTTC);
+        printf("Statut : %s\n", commande.statut);
     }
 }
-
 
 
 /* Ajouter des points de fidelite */
 
 void ajouterPoints(Boutique *b, int idClient, int points) {
-    printf("erreur");
+    int index = trouverClient(b, idClient);
+
+    if (index == 0) {
+        printf("Client non trouve.\n");
+        return;
+    }
+
+    index--;
+
+    b->clients[index].pointsFidelite += points;
 
 }
 
@@ -217,5 +219,18 @@ void ajouterPoints(Boutique *b, int idClient, int points) {
 /* Retirer des points de fidelite */
 
 void retirerPoints(Boutique *b, int idClient, int points) {
-    printf("erreur");
+    int index = trouverClient(b, idClient);
+
+    if (index == 0) {
+        printf("Client non trouve.\n");
+        return;
+    }
+
+    index--;
+
+    if (b->clients[index].pointsFidelite < points) {
+        b->clients[index].pointsFidelite = 0;
+    } else {
+        b->clients[index].pointsFidelite -= points;
+    }
 }
