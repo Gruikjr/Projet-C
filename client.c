@@ -165,13 +165,53 @@ void afficherListeClients(Boutique *b) {
 
 
 /* Afficher un client et son historique de commandes */
+void afficherClient(Boutique *b, int idClient) {
+    int index = trouverClient(b, idClient);
 
+    if (index == 0) {
+        printf("Client non trouve.\n");
+        return;
+    }
+
+    index--;
+
+    printf("\n FICHE CLIENT \n");
+    printf("ID : %d\n", b->clients[index].idClient);
+    printf("Nom : %s %s\n", b->clients[index].prenom, b->clients[index].nom);
+    printf("Email : %s\n", b->clients[index].email);
+    printf("Telephone : %s\n", b->clients[index].telephone);
+    printf("Adresse : %s, %s, %s, %s\n",
+           b->clients[index].adresse.rue,
+           b->clients[index].adresse.ville,
+           b->clients[index].adresse.codePostal,
+           b->clients[index].adresse.pays);
+    printf("Nombre de commandes : %d\n", b->clients[index].nbCommandes);
+    printf("Points de fidelite : %d\n", b->clients[index].pointsFidelite);
+
+    printf("\n HISTORIQUE DES COMMANDES \n");
+    for (int i = 0; i < b->clients[index].nbCommandes; i++) {
+        Commande commande = b->clients[index].commandes[i];
+        printf("\nCommande ID : %d\n", commande.idCommande);
+        printf("Date : %s\n", commande.date);
+        printf("Montant TTC : %.2f euros\n", commande.montantTTC);
+        printf("Statut : %s\n", commande.statut);
+    }
+}
 
 
 /* Ajouter des points de fidelite */
 
 void ajouterPoints(Boutique *b, int idClient, int points) {
-    printf("erreur");
+    int index = trouverClient(b, idClient);
+
+    if (index == 0) {
+        printf("Client non trouve.\n");
+        return;
+    }
+
+    index--;
+
+    b->clients[index].pointsFidelite += points;
 
 }
 
@@ -179,5 +219,18 @@ void ajouterPoints(Boutique *b, int idClient, int points) {
 /* Retirer des points de fidelite */
 
 void retirerPoints(Boutique *b, int idClient, int points) {
-    printf("erreur");
+    int index = trouverClient(b, idClient);
+
+    if (index == 0) {
+        printf("Client non trouve.\n");
+        return;
+    }
+
+    index--;
+
+    if (b->clients[index].pointsFidelite < points) {
+        b->clients[index].pointsFidelite = 0;
+    } else {
+        b->clients[index].pointsFidelite -= points;
+    }
 }
