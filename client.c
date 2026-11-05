@@ -15,15 +15,17 @@
 #include <string.h>
 
 #include "client.h"
+#include "utils.h"
 
 
-/* Rechercher un client par son identifiant */
+/* Rechercher un client ACTIF par son identifiant : retourne sa position + 1,
+ * ou 0 s'il est introuvable (ou supprime logiquement). */
 
 int trouverClient(Boutique *b, int idClient) {
 
     for (int i = 0; i < b->nbClients; i++) {
 
-        if (b->clients[i].idClient == idClient) {
+        if (b->clients[i].idClient == idClient && b->clients[i].actif == 1) {
             return i + 1;
         }
     }
@@ -82,8 +84,6 @@ int ajouterClient(Boutique *b, Client nouveauClient) {
     return 1;
 }
 
-//blabla blibli bloublou
-
 /* Modifier un client */
 
 int modifierClient(Boutique *b, int idClient, Client modification) {
@@ -141,26 +141,32 @@ int supprimerClient(Boutique *b, int idClient) {
 }
 
 
-/* Afficher la liste des clients */
+/* Afficher la liste des clients (CA HT hors commandes annulees) */
 
 void afficherListeClients(Boutique *b) {
-    printf("\n LISTE DES CLIENTS \n");
+    printf("\n=== LISTE DES CLIENTS ===\n");
+    printf("%-4s %-26s %-28s %5s %12s\n",
+           "ID", "Nom", "Email", "Cmd", "CA HT (EUR)");
+    printf("------------------------------------------------------------------------------\n");
+
+    int affiches = 0;
     for (int i = 0; i < b->nbClients; i++) {
-        if (b->clients[i].actif == 1) {
-            float chiffreAffaires = 0;
-            for (int j = 0; j < b->clients[i].nbCommandes; j++) {
-                if (b->clients[i].commandes[j].statut, STATUT_LIVREE) {
-                    chiffreAffaires += b->clients[i].commandes[j].montantTVA;
-                }
-            }
-            printf("\nID : %d\n", b->clients[i].idClient);
-            printf("Nom : %s %s\n", b->clients[i].prenom, b->clients[i].nom);
-            printf("Email : %s\n", b->clients[i].email);
-            printf("Telephone : %s\n", b->clients[i].telephone);
-            printf("Nombre de commandes : %d\n", b->clients[i].nbCommandes);
-            printf("Chiffre d'affaires : %.2f euros\n", chiffreAffaires);
+        const Client *cl = &b->clients[i];
+        if (cl->actif != 1) continue;
+
+        double chiffreAffaires = 0.0;
+        for (int j = 0; j < cl->nbCommandes; j++) {
+            if (strcmp(cl->commandes[j].statut, STATUT_ANNULEE) != 0)
+                chiffreAffaires += cl->commandes[j].montantHT;
         }
+
+        char nomComplet[MAX_NOM + MAX_PRENOM + 2];
+        snprintf(nomComplet, sizeof nomComplet, "%s %s", cl->prenom, cl->nom);
+        printf("%-4d %-26.26s %-28.28s %5d %12.2f\n", cl->idClient,
+               nomComplet, cl->email, cl->nbCommandes, chiffreAffaires);
+        affiches++;
     }
+    if (affiches == 0) printf("(aucun client)\n");
 }
 
 
@@ -191,8 +197,11 @@ void afficherClient(Boutique *b, int idClient) {
     printf("\n HISTORIQUE DES COMMANDES \n");
     for (int i = 0; i < b->clients[index].nbCommandes; i++) {
         Commande commande = b->clients[index].commandes[i];
-        printf("\nCommande ID : %d\n", commande.idCommande);
-        printf("Date : %s\n", commande.date);
+        printf("\nCommande ID : %d\n", commande.numero);
+        printf("Date : %02d/%02d/%04d\n",
+               commande.dateCommande.jour,
+               commande.dateCommande.mois,
+               commande.dateCommande.annee);
         printf("Montant TTC : %.2f euros\n", commande.montantTTC);
         printf("Statut : %s\n", commande.statut);
     }
@@ -233,4 +242,28 @@ void retirerPoints(Boutique *b, int idClient, int points) {
     } else {
         b->clients[index].pointsFidelite -= points;
     }
+}
+
+/* Saisie complete d'un client (utilisee pour l'ajout et la modification).
+ * Tous les champs sont valides : non vides, email avec '@', telephone a
+ * 10 chiffres, code postal a 5 chiffres. */
+Client saisirClient(void)
+{
+    Client c;
+    memset(&c, 0, sizeof c);
+
+    lireChaine("  Nom : ",    c.nom,    sizeof c.nom);
+    lireChaine("  Prenom : ", c.prenom, sizeof c.prenom);
+    lireChaineValide("  Email : ", c.email, sizeof c.email,
+                      estEmailValide, "adresse email invalide (ex. a@b.fr).");
+    lireChaineValide("  Telephone (10 chiffres) : ", c.telephone,
+                     sizeof c.telephone, estTelephoneValide,
+                     "10 chiffres attendus.");
+    lireChaine("  Rue : ",   c.adresse.rue,   sizeof c.adresse.rue);
+    lireChaine("  Ville : ", c.adresse.ville, sizeof c.adresse.ville);
+    lireChaineValide("  Code postal (5 chiffres) : ", c.adresse.codePostal,
+                     sizeof c.adresse.codePostal, estCodePostalValide,
+                     "5 chiffres attendus.");
+    lireChaine("  Pays : ",  c.adresse.pays,  sizeof c.adresse.pays);
+    return c;
 }

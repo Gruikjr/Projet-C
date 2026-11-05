@@ -232,3 +232,98 @@ void afficherPalmaresClients(const Boutique *b)
 
     free(stats);
 }
+
+/* ============================================================
+ * CREATIF 1 : STATISTIQUES PAR CATEGORIE
+ * ============================================================ */
+
+typedef struct {
+    char   categorie[LG_CATEGORIE];
+    int    quantite;
+    double caHT;
+} StatCategorie;
+
+static int comparerCategories(const void *pa, const void *pb)
+{
+    const StatCategorie *a = pa, *b = pb;
+    if (a->caHT > b->caHT) return -1;
+    if (a->caHT < b->caHT) return 1;
+    return strcmp(a->categorie, b->categorie);
+}
+
+void afficherStatsCategories(const Boutique *b)
+{
+    if (b == NULL) return;
+
+    printf("\n=== STATISTIQUES PAR CATEGORIE (commandes annulees exclues) ===\n");
+    if (b->nbProduits == 0) {
+        printf("Aucun produit au catalogue.\n");
+        return;
+    }
+
+    /* Au plus une categorie par produit : tableau temporaire */
+    StatCategorie *stats = calloc((size_t)b->nbProduits, sizeof *stats);
+    if (stats == NULL) {
+        printf("Erreur : memoire insuffisante.\n");
+        return;
+    }
+    int nb = 0;
+
+    for (int i = 0; i < b->nbClients; ++i)
+        for (int j = 0; j < b->clients[i].nbCommandes; ++j) {
+            const Commande *c = &b->clients[i].commandes[j];
+            if (estAnnulee(c)) continue;
+
+            for (int k = 0; k < c->nbLignes; ++k) {
+                int idx = indexProduit(b, c->lignes[k].refProduit);
+                if (idx < 0) continue;
+                const char *cat = b->produits[idx].categorie;
+
+                int pos = 0;
+                while (pos < nb && strcmp(stats[pos].categorie, cat) != 0) ++pos;
+                if (pos == nb) {
+                    strcpy(stats[nb].categorie, cat);
+                    ++nb;
+                }
+                stats[pos].quantite += c->lignes[k].quantite;
+                stats[pos].caHT     += c->lignes[k].sousTotalHT;
+            }
+        }
+
+    if (nb == 0) {
+        printf("Aucune vente enregistree.\n");
+    } else {
+        qsort(stats, (size_t)nb, sizeof *stats, comparerCategories);
+        printf("\n%-5s %-20s %8s %14s\n", "Rang", "Categorie", "Qte", "CA HT brut");
+        printf("-------------------------------------------------\n");
+        for (int i = 0; i < nb; ++i)
+            printf("%-5d %-20.20s %8d %14.2f\n", i + 1, stats[i].categorie,
+                   stats[i].quantite, stats[i].caHT);
+    }
+    free(stats);
+}
+
+/* ============================================================
+ * CREATIF 2 : EXPORT CSV DES COMMANDES
+ * ============================================================ */
+
+int exporterCommandesCSV(const Boutique *b, const char *nomFichier)
+{
+    if (b == NULL || nomFichier == NULL) return 0;
+
+    FILE *f = fopen(nomFichier, "w");
+    if (f == NULL) return 0;
+
+    fprintf(f, "numero;idClient;date;statut;montantBrutHT;remise;montantHT;"
+               "TVA;fraisPort;montantTTC\n");
+    for (int i = 0; i < b->nbClients; ++i)
+        for (int j = 0; j < b->clients[i].nbCommandes; ++j) {
+            const Commande *c = &b->clients[i].commandes[j];
+            fprintf(f, "%d;%d;%02d/%02d/%04d;%s;%.2f;%.2f;%.2f;%.2f;%.2f;%.2f\n",
+                    c->numero, c->idClient, c->dateCommande.jour,
+                    c->dateCommande.mois, c->dateCommande.annee, c->statut,
+                    c->montantBrutHT, c->montantRemise, c->montantHT,
+                    c->montantTVA, c->fraisPort, c->montantTTC);
+        }
+    return fclose(f) == 0;
+}

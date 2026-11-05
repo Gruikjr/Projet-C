@@ -1,24 +1,24 @@
 /* ============================================================
- * produit.h - Interface du module Catalogue produits
+ * types.h - Structures partagees et constantes du projet ShopFlow
  * ------------------------------------------------------------
- * ROLE : declare le CRUD des produits (ajouter, modifier, supprimer,
- *        lister, rechercher), la recherche par reference et les alertes
- *        de stock.
- * UTILISE PAR : main.c (menu), commande.c (lecture/mise a jour du stock),
- *        statistique.c (palmares produits).
+ * ROLE : declare les 7 structures (Date, Adresse, Produit,
+ *        LigneCommande, Commande, Client, Boutique) et les constantes.
+ *        Inclus par tous les modules (evite les inclusions circulaires
+ *        entre client.h et commande.h).
  * ============================================================ */
-// types.h
-
 #ifndef TYPES_H
 #define TYPES_H
 
-/* Tailles maximales */
-#define MAX_NOM 50
-#define MAX_PRENOM 50
-#define MAX_EMAIL 80
-#define MAX_TELEPHONE 15
+/* Tailles des champs (taille du tableau, '\0' compris) */
+#define MAX_NOM        50
+#define MAX_PRENOM     50
+#define MAX_EMAIL      80
+#define MAX_TELEPHONE  15
+#define MAX_RUE        80
+#define MAX_VILLE      50
+#define MAX_CODEPOSTAL 6
+#define MAX_PAYS       50
 
-/* Tailles des champs (produits / statut) */
 #define LG_REFERENCE   12
 #define LG_DESIGNATION 60
 #define LG_CATEGORIE   30
@@ -30,10 +30,11 @@
 #define STATUT_LIVREE   "LIVREE"
 #define STATUT_ANNULEE  "ANNULEE"
 
-/* Constantes métier */
-#define TVA 20.0
-#define FRAIS_PORT 5.90
-#define CAPACITE_INITIALE 4
+/* Constantes metier */
+#define TVA        20.0     /* % applique sur le HT apres remise        */
+#define FRAIS_PORT 5.90     /* EUR, offerts des SEUIL_PORT_OFFERT        */
+#define SEUIL_PORT_OFFERT 60.0
+#define STOCK_MAX  1000000
 
 /* Structure Date */
 typedef struct {
@@ -42,42 +43,40 @@ typedef struct {
     int annee;
 } Date;
 
-/* Structure Adresse */
+/* Structure Adresse (ordre impose par le sujet) */
 typedef struct {
-    char rue[80];
-    char codePostal[6];
-    char ville[50];
-    char pays[50];
+    char rue[MAX_RUE];
+    char ville[MAX_VILLE];
+    char codePostal[MAX_CODEPOSTAL];
+    char pays[MAX_PAYS];
 } Adresse;
 
 /* Structure Produit */
 typedef struct {
-    char reference[12];
-    char designation[60];
-    char categorie[30];
+    char  reference[LG_REFERENCE];
+    char  designation[LG_DESIGNATION];
+    char  categorie[LG_CATEGORIE];
     float prixUnitaireHT;
-    int quantiteStock;
-    int seuilAlerte;
-    int actif;
+    int   quantiteStock;
+    int   seuilAlerte;
+    int   actif;
 } Produit;
 
 /* Structure LigneCommande */
 typedef struct {
-    char refProduit[12];
-    char designation[60];
-    int quantite;
+    char  refProduit[LG_REFERENCE];
+    char  designation[LG_DESIGNATION];
+    int   quantite;
     float prixUnitaireHT;
     float sousTotalHT;
 } LigneCommande;
 
 /* Structure Commande */
 typedef struct {
-    int numero;
-    int idClient;
-
+    int  numero;
+    int  idClient;
     Date dateCommande;
-
-    char statut[20];
+    char statut[LG_STATUT];
 
     int nbLignes;
     int capaciteLignes;
@@ -96,16 +95,13 @@ typedef struct {
 
 /* Structure Client */
 typedef struct {
-    int idClient;
-
+    int  idClient;
     char nom[MAX_NOM];
     char prenom[MAX_PRENOM];
     char email[MAX_EMAIL];
     char telephone[MAX_TELEPHONE];
-
     Adresse adresse;
-
-    int pointsFidelite;
+    int  pointsFidelite;
 
     Commande *commandes;
     int nbCommandes;
@@ -114,7 +110,7 @@ typedef struct {
     int actif;
 } Client;
 
-/* Structure Boutique si qqun peut corriger :* */
+/* Structure Boutique (racine) */
 typedef struct {
     char nom[50];
 

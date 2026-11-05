@@ -24,4 +24,10 @@ void afficherChiffreAffaires(const Boutique *b);     /* global + periode  */
 void afficherPalmaresProduits(const Boutique *b);    /* top 5 par quantite */
 void afficherPalmaresClients(const Boutique *b);     /* tous, par CA       */
 
+/* --- Fonctionnalites creatives --- */
+/* Statistiques par categorie : quantites vendues et CA HT brut */
+void afficherStatsCategories(const Boutique *b);
+/* Export CSV de toutes les commandes (separateur ';'). Retourne 1 si OK. */
+int  exporterCommandesCSV(const Boutique *b, const char *nomFichier);
+
 #endif

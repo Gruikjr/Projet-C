@@ -117,6 +117,64 @@ double lireReel(const char *invite, double min, int minExclus)
 }
 
 /* ============================================================
+ * VALIDATIONS
+ * ============================================================ */
+
+static int tousChiffres(const char *s, size_t n)
+{
+    if (strlen(s) != n) return 0;
+    for (size_t i = 0; i < n; ++i)
+        if (!isdigit((unsigned char)s[i])) return 0;
+    return 1;
+}
+
+int estEmailValide(const char *email)
+{
+    const char *arobase = strchr(email, '@');
+    if (arobase == NULL || arobase == email || arobase[1] == '\0') return 0;
+    if (strchr(arobase + 1, '@') != NULL) return 0;
+    return strchr(email, ' ') == NULL;
+}
+
+int estTelephoneValide(const char *tel)    { return tousChiffres(tel, 10); }
+int estCodePostalValide(const char *cp)    { return tousChiffres(cp, 5); }
+
+int dateValide(int jour, int mois, int annee)
+{
+    static const int joursParMois[] = {31,28,31,30,31,30,31,31,30,31,30,31};
+    if (annee < 2000 || annee > 2100 || mois < 1 || mois > 12 || jour < 1)
+        return 0;
+
+    int max = joursParMois[mois - 1];
+    int bissextile = (annee % 4 == 0 && annee % 100 != 0) || annee % 400 == 0;
+    if (mois == 2 && bissextile) max = 29;
+    return jour <= max;
+}
+
+void lireChaineValide(const char *invite, char *dest, size_t taille,
+                      int (*valide)(const char *), const char *messageErreur)
+{
+    for (;;) {
+        lireChaine(invite, dest, taille);
+        if (valide(dest)) return;
+        printf("Erreur : %s\n", messageErreur);
+    }
+}
+
+Date lireDate(const char *invite)
+{
+    Date d;
+    printf("%s\n", invite);
+    for (;;) {
+        d.jour  = lireEntier("  Jour  (1-31)     : ", 1, 31);
+        d.mois  = lireEntier("  Mois  (1-12)     : ", 1, 12);
+        d.annee = lireEntier("  Annee (2000-2100): ", 2000, 2100);
+        if (dateValide(d.jour, d.mois, d.annee)) return d;
+        printf("Erreur : cette date n'existe pas.\n");
+    }
+}
+
+/* ============================================================
  * OUTILS CHAINES
  * ============================================================ */
 
